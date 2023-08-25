@@ -94,7 +94,6 @@ class STAFF {
 				return staff_id;
 			}
 		 int init(char*);
-         int manageAttendence();
          int manageMarks();
  	virtual void showProfile(){
 	clrscr();
@@ -133,11 +132,7 @@ class ADMIN:public STAFF{
 		int removeStaff(char*);
 		int removeStudent(char*);
 		void viewMarks();
-		void viewAttendence();
-	    int manageAttendence();
 		int listStudent();
-		int Notification();
-	    int complaint();
 	    int timetable();
 		bool isValidPass(char *p){
 			cout<<"\n\n\tAuthenticating...";
@@ -158,7 +153,7 @@ class STUDENT{
         char dob[11];
         struct sub{
             int mp,co,oop,math;
-            }marks,attendence;
+            }marks;
 		public : STUDENT(){
 				admissionNo=-1;
 				strcpy(Index,"\0");
@@ -169,19 +164,12 @@ class STUDENT{
 				marks.co=-1;
 				marks.oop=-1;
 				marks.math=-1;
-				attendence.mp=0;
-				attendence.co=0;
-				attendence.oop=0;
-				attendence.math=0;
 		 }
 
         //Member fucntion prototype
         int init(char*);
         void showProfile();
-        void showAttendence();
         void showMarks();
-        int Notification();
-        int complaint();
         int paper();
         int timetable();
 		friend class ADMIN;
@@ -216,22 +204,6 @@ void ADMIN:: viewMarks(){
 		return;
 		}
 	s.showMarks();
-}
-
-void ADMIN::viewAttendence(){
-	char u[15];
-	clrscr();
-	title();
-	cout<<"Please enter student Index Number : "; cin>>u;
-	strupr(u);
-	STUDENT s;
-	fflush(stdin);
-	if(s.init(u)){
-		cout<<" Enter valid Index Number...";
-		cin.get();
-		return;
-	}
-	s.showAttendence();
 }
 
 // remove student ::by setting up all the attributes of student to null and overwriting on the old blocks
@@ -271,11 +243,6 @@ int ADMIN::removeStudent(char *U){
 			temp.marks.co=0;
 			temp.marks.oop=0;
 			temp.marks.math=0;
-
-		    temp.attendence.mp=0;
-			temp.attendence.co=0;
-			temp.attendence.oop=0;
-			temp.attendence.math=0;
 	readfile.seekp(pos);
 	readfile.write((char*)&temp,sizeof(temp));
 	fflush(stdin);
@@ -313,46 +280,6 @@ int ADMIN::addstaff(){
 	putf.close();
 	cout<<endl<<" Staff member added successfully..."; cin.get();
 	return SUCCESS;
-}
-
-int ADMIN::Notification(){
-	clrscr();
-	ofstream putf("notification.dat",ios::binary|ios::out|ios::app);
-	if(!putf){
-		cerr<<"Unable to open student record file ";
-		return F_NOT_FOUND;
-	}
-	title();
-	char today[11],note[500];
-	getdate(today);
-	 cout<<"\t\t\t\t\t\t\t    Today : "<<today;
-	cout<<"\nEnter Notifications: \n";
-	fflush(stdin);
-	cin.getline(note,500);
-    putf<<"\n_________________________________________________________________   "<<today<<"\n"<<note<<"\n\n\n";	
-	putf.close();
-	cout<<endl<<" Notification added successfully..."; cin.get();	
-}
-
-int ADMIN::complaint(){
-	clrscr();
-	char ch;
-	cout<<"\n\tCOMPLAINT:\n\n";
-    ifstream readfile1("complaint.dat",ios::binary|ios::in);
-    if(!readfile1.is_open()){
-              return F_NOT_FOUND;
-    }
-	fflush(stdin);
-	title();
-	readfile1.seekg(0);
-	cout<<"\n ";
-    while(!readfile1.eof()){
-    readfile1.get(ch);
-    cout<<ch;
-    }
-    cout<<"\nPress any key to return...";
-	cin.get();
-	readfile1.close();
 }
 
 int ADMIN::timetable(){
@@ -419,84 +346,6 @@ int ADMIN::removeStaff(char *U){
 	cout<<"Staff  removed successfully...";
 	cin.get();
 	return SUCCESS;
-}
-
-//administrator acces to change the attendenc
-int ADMIN::manageAttendence(){
-	       title();
-		   char tday[10],date[11];
-		   flag=0;
-		   getdate(tday);
-		   cout<<"\t\t\t\t\t\t\t    Today : "<<tday;
-		   cout<<"\n\tYou have permission to change the attendence, only 6 days before the"<<endl;
-		   cout<<" final exam to give eligibilty to the student who has less than 75%."<<endl;
-		   cout<<endl<<"\n\nEnter the final exam date [DD/MM/YYYY] : ";
-		   cin>>date;
-		   int i,j,x,y;
-
-		   x=tday[3]-'0';
-		   x=x*10+(tday[4]-'0');
-		   y=date[3]-'0';
-		   y=y*10+(date[4]-'0');
-		   i=tday[0]-'0';
-		   i=i*10+(tday[1]-'0');
-		   j=date[0]-'0';
-		   j=j*10+(date[1]-'0');
-
-		   Sleep(1000);
-		   if(j-i<7&&x==y){
-		   cout<<"Enter the subject to modify :";
-		   cin>>staff_sub;
-			    fflush(stdin);
-		   strlwr(staff_sub);
-
-		   cout<<"Enter the Index Number : ";
-
-			   fflush(stdin);
-			   char u[11];
-			   cin>>u;
-			   strupr(u);
-			   STUDENT s;
-			   fstream f("student.dat",ios::in|ios::in|ios::out);
-			   int pos;
-			   while(!f.eof()){
-				   pos=f.tellg();
-				   f.read((char*)&s,sizeof(s));
-				   if(!strcmp(s.Index,u)){
-					   flag=1;
-					   break;
-		          }
-			   }
-			   if(flag){
-				   cout<<"Enter the attendence : ";
-				   int num;
-				   cin>>num;
-				   if(subject==3)
-						s.attendence.mp=num;
-
-				   	else if(subject==2)
-							s.attendence.co=num;
-					else if(subject==4)
-							s.attendence.oop=num;
-					else if(subject==1)
-						s.attendence.math=num;
-						f.seekp(pos);
-						f.write((char*)&s,sizeof(s));
-						cout<<"Attendence updated.";
-				   f.close();
-				   fflush(stdin);
-				   cin.get();
-
-						}
-			   else {cerr<<"Index Number not found...";
-			   cin.get();
-		   }
-		   }
-		   else {
-			   cout<<"Sorry, You cannot change the attendance.";
-			   Sleep(800);
-		   return 0;
-		   }
 }
 
 int ADMIN::listStudent(){
@@ -581,11 +430,6 @@ int ADMIN::admitStudent(){
 	cout<<" # Index Number : "<<temp.Index<<endl;
 	cout<<" # Date of birth          : "<<temp.dob<<endl;
 	cout<<" # Email id               : "<<temp.email<<endl;
-
-		    temp.attendence.mp=0;
-			temp.attendence.co=0;
-			temp.attendence.oop=0;
-			temp.attendence.math=0;
 	cout<<" Are the above details correct?  [Y/N] : ";
 	char yes;
 	cin.get(yes); fflush(stdin);
@@ -638,23 +482,6 @@ void STUDENT::showMarks(){
 	cin.get();
 }
 
-//dispaly attendencce
-void STUDENT::showAttendence(){
-	fflush(stdin);
-	clrscr();
-	title();
-	cout<<" Attendence Result     : "<<name<<endl;
-	cout<<endl<<"_________________________________________________________________________"<<endl;
-	cout<<" SUBJECT NAME                        | Class Attended "<<endl;
-    cout<<"_______________________________________________________________________________"<<endl;
-	cout<<" Micro Processor                     | "<<attendence.mp<<endl;
-    cout<<" Object Oriented Programming         | "<<attendence.oop<<endl;
-    cout<<" Computer Organization & architector | "<<attendence.co<<endl;
-	cout<<" Mathematics                         | "<<attendence.math<<endl;
-
-	cout<<"Press any key to exit :"; cin.get();
-
-}
 
 //initialize the student data with details of logged in student
 // also checks if log-in id(Index Number) is correct/exist 
@@ -686,29 +513,6 @@ int STUDENT::init(char *U){
 	return SUCCESS;
 }
 
-int STUDENT::Notification(){
-	clrscr();
-	char ch;
-	
-    ifstream readfile("notification.dat",ios::binary|ios::in);
-    if(!readfile.is_open()){
-              return F_NOT_FOUND;
-    }
-
-	title();
-	cout<<"\n\tNOTIFICATIONS: \n\n";
-	readfile.seekg(0);
-	cout<<"\n ";
-    while(!readfile.eof()){
-    readfile.get(ch);
-    cout<<ch;
-    }
-    
-    cout<<"\nPress any key to return...";
-	cin.get();
-	readfile.close();
-}
-
 int STUDENT::timetable(){
 	clrscr();
 	char ch;
@@ -732,27 +536,6 @@ int STUDENT::timetable(){
 }
 
 char u1[11];
-int STUDENT::complaint(){
-	clrscr();
-    ofstream putf("complaint.dat",ios::binary|ios::out|ios::app);
-	if(!putf){
-		cerr<<"Unable to open student record file ";
-		return F_NOT_FOUND;
-	}
-
-	title();
-	char today[11],note[500];
-	getdate(today);
-	 cout<<"\t\t\t\t\t\t\t    Today : "<<today;
-	cout<<"\nEnter Complaint: \n";
-	fflush(stdin);
-	cin.getline(note,500);
-		putf<<"\n\n__________________________________________________________       "<<today<<"\n"<<note<<"\t -"<<u1<<"\n\n\n";
-		
-	putf.close();
-	cout<<endl<<" Complaint given successfully..."; cin.get();	
-}
-
 
 int STAFF::init(char *id){
     bool flag=false;
@@ -848,142 +631,6 @@ int STAFF::manageMarks(){
 
 }
 
-
-
-int STAFF::manageAttendence(){
-	char day[10];
-	clrscr();
-	fflush(stdin);
-	title();
-	getdate(day);
-
-	if(isAt_Done()){
-		cout<<"\tDate : "<<day<<endl;;
-
-		cout<<"You have already entered today's attendence...\nSorry, You cannot enter again..."<<endl;
-		cin.get();
-		return 0;
-	}
-	char presence;
-	STUDENT temp[80];
-    ifstream readfile("student.dat",ios::binary|ios::in);
-	if(!readfile.is_open()){
-		cout<<"Error : Student database file missing...";
-		return F_NOT_FOUND;
-	}
-	int n=0;
-	while(!readfile.eof()){
-		readfile.read((char*)&temp[n],sizeof(temp[n]));
-		if(!strcmp(temp[n].Index,"\0")) continue;
-		n++;
-		}
-	  readfile.close();
-	cout<<endl<<"Subject : ";
-		switch(subject){
-		case 1 :cout<<"Mathematics"; break;
-		case 2 :cout<<"Computer Organization"; break;
-		case 3 :cout<<"Micro Processor"; break;
-		case 4 :cout<<"Object Oriented Programming"; break;
-		}
-	cout<<"\tDate : "<<day<<endl;;
-
-	cout<<"\t 1 : Mark all absent\n\t 2 : Enter absenties' Index "<<endl;
-	cout<<"\t Select your choice : ";
-	int choice;
-	char yes;
-	cin>>choice;
-	if(choice==1){ cout<<"Marking everyone absent...\nAre you sure : [Y/N] ";
-	  cin>>yes;
-	  if(yes=='y'||yes=='Y'){
-        setbits();
-   	    cout<<"Attendence updated...";
-		return 0;
-	  		}
-		}
-	else if(choice!=2) return 0;
-	clrscr();
-	title();
-	cout<<endl<<"Enter absenties Index : [Complete Index Number or last 3/2 digit(0 to end) ]\n_";
-	char absent[12],l_absent[12];  //ASSUMED ONLY FOR CSE DEPT
-	int count=0;
-
-	fstream t("log.bin",ios::in|ios::out|ios::trunc);
-	while(1){
-
-		cin>>absent;
-
-		if(!strcmp(absent,"0")) break;
-
-		strupr(absent);
-		if((strlen(absent))==3){
-			strcpy(l_absent,"INFT");
-			strcat(l_absent,absent);
-			t<<l_absent<<endl;
-		}
-		else if((strlen(absent))==2){
-			strcpy(l_absent,"INFT0");
-			strcat(l_absent,absent);
-			t<<l_absent<<endl;
-		}
-
-		else
-			t<<absent<<endl;
-		count++;
-	}
-	t<<"0";
-	title();
-	t.seekp(0L);
-	cout<<" Absenties list : \n"<<endl;
-	while(1){
-		t.getline(absent,11);
-		if(!strcmp(absent,"0")) break;
-		cout<<" \t"<<absent<<endl;
-	}
-	 t.close();
-	fflush(stdin);
-	cout<<"\n\tTotal absent   = "<<count<<endl;
-	cout<<"\tTotal present = "<<n-count<<endl;
-	cout<<"Press enter to proceed : ";
-	cin.get();
-	ofstream writefile("student.dat",ios::binary|ios::out);
-	for(int i=0;i<n;i++){
-			temp[i]++;
-           writefile.write((char*)&temp[i],sizeof(temp[i]));
-
-	}
-	setbits();
-	cout<<"Attendence updated...";
-	cin.get();
-	writefile.close();
-}
-
-//Upadte all student attendence, except absenties
-void STUDENT::operator++(int){
-	flag=0;
-	ifstream log("log.bin");
-	char absent[11];
-	log.seekg(0L);
-	while(!log.eof()){
-		log.getline(absent,11);
-		if(!strncmp(Index,absent,10)){
-		flag=1; break;
-		}
-	}
-	if(flag==0){
-		if(subject==3)
-		++attendence.mp;
-
-
-	else if(subject==2)
-        attendence.co++;
-	else if(subject==4)
-         attendence.oop++;
-	else if(subject==1)
-		attendence.math++;
-
-		} log.close();
-}
-
 //Initial usage...Program will check for the availabe student database files
 //if its not available program will create new files
 int setup(){
@@ -1002,12 +649,6 @@ int setup(){
 	_ofp.close();
 	ofstream _o("log.bin",ios::out);
 	_o.close();
-	ofstream _f("notification.dat",ios::binary|ios::out);
-	if(!_f.is_open()) return -1;
-	_f.close();
-	ofstream _fi("complaint.dat",ios::binary|ios::out);
-	if(!_fi.is_open()) return -1;
-	_fi.close();
 	ofstream _fii("topic.dat",ios::binary|ios::out);
 	if(!_fii.is_open()) return -1;
 	_fii.close();
@@ -1112,7 +753,7 @@ int student(){
 		title();
 		cout<<"\tLogin type : Student  ["<<Index<<"]"<<endl;
        	cout<<"\t\tMenu"<<endl;
-       	cout<<"\t\t1 : View profile\n\t\t2 : View attendence\n\t\t3 : View marks\n\t\t4 : View Notifications \n\t\t5 : Give a Complaint \n\t\t6 : Exit"<<endl;
+       	cout<<"\t\t1 : View profile\n\t\t2 : View marks\n\t\t4 : Exit"<<endl;
        	cout<<"\tEnter your choice  : ";
        	cin>>choice;
        	switch(choice){
@@ -1121,23 +762,10 @@ int student(){
 		   			s.showProfile();
                     break;
            case 2 : fflush(stdin);
-                    clrscr();
-		            s.showAttendence();
-                     break;
-           case 3 : fflush(stdin);
 		   			clrscr();
 		   			s.showMarks();
-                    break;
-           case 4 : fflush(stdin);
-		   			clrscr();
-		   			s.Notification();
-                    break;        
-           case 5 : fflush(stdin);
-		   			clrscr();
-		   			strcpy(u1,Index);
-		   			s.complaint();
                     break;      
-		   case 6 : cout<<"Logging out...["<<Index<<"]";
+		   case 4 : cout<<"Logging out...["<<Index<<"]";
 		   			Sleep(1000);
 		   			return SUCCESS;
             default : cout<<"Select valid choice : ";
@@ -1178,7 +806,7 @@ int staff(){
 	title();
 	cout<<"\tLogin type : Staff  ["<<staffid<<"]"<<endl;
        cout<<"\t\tMenu"<<endl;
-       cout<<"\t\t1 : View profile\n\t\t2 : Manage attendence\n\t\t3 : Manage marks\n\t\t4 : Exit"<<endl;
+       cout<<"\t\t1 : View profile\n\t\t2 : Manage marks\n\t\t4 : Exit"<<endl;
        cout<<"\n\tEnter your choice  : ";
        int choice;
        cin>>choice;
@@ -1186,9 +814,7 @@ int staff(){
            case 1 :fflush(stdin); clrscr(); staf.showProfile();
 
 		   			break;
-           case 2 : fflush(stdin); clrscr(); staf.manageAttendence();
-                    break;
-           case 3 : fflush(stdin); clrscr();
+           case 2 : fflush(stdin); clrscr();
 		   				staf.manageMarks();
                     break;
            case 4 : cout<<"Logging out...["<<staffid<<"]";
@@ -1230,8 +856,8 @@ int admin(){
     cout<<"\tLogin type : Administrator  ["<<id<<"]"<<endl;
     cout<<"\t\tMenu"<<endl;
     cout<<"_______________________________________________________________________________"<<endl;
-	cout<<"\t\t1 : Admit student\n\t\t2 : Remove Student\n\t\t3 : Add Staff\n\t\t4 : Remove Staff\n\t\t5 : List Students\n\t\t6 : Manage attendance";
-	cout<<"\n\t\t7 : View student attendance\n\t\t8 : View student marks \n\t\t9 : Notifications \n\t\t10: Check Complaints \n\t\t11: Exit"<<endl;
+	cout<<"\t\t1 : Admit student\n\t\t2 : Remove Student\n\t\t3 : Add Staff\n\t\t4 : Remove Staff\n\t\t5 : List Students\n\t\t6 : View student marks";
+	cout<<"\n\t\t9 : Exit"<<endl;
 	cout<<"_______________________________________________________________________________"<<endl;
 	cout<<"\n\tEnter your choice  : ";
     int choice;
@@ -1255,21 +881,9 @@ int admin(){
 		   			ad.listStudent();
                     	break;
 			case 6 :clrscr();
-		   			ad.manageAttendence();
-                    break;
-			case 8 :clrscr();
 		   			ad.viewMarks();
-		   		    	break;
-		   	case 7 :clrscr();
-		   			ad.viewAttendence();
-		   		   		break;
-		  	case 9 :clrscr();
-		   		   	ad.Notification();
-		   		   		break;
-		   	case 10 :clrscr();
-		   		   	ad.complaint();
-		   		   		break;		   	
-           	case 11 :cout<<"Logging out...["<<id<<"]";
+		   		    	break;		   	
+           	case 9 :cout<<"Logging out...["<<id<<"]";
 		   			Sleep(1000);
                     	return 0;
 			case 23 :
@@ -1279,4 +893,3 @@ int admin(){
        }
     }
 }
-
